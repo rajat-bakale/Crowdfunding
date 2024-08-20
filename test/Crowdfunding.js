@@ -67,11 +67,9 @@ describe("CrowdFunding Contract", function () {
     
         await crowdfunding.createRequests("Request 1", recipient.address, ethers.parseEther("3"));
     
-        // Voting by both contributors (assuming the total number of contributors is 2)
         await crowdfunding.connect(contributor1).voteRequest(0);
         await crowdfunding.connect(contributor2).voteRequest(0);
     
-        // Now, attempt to make the payment
         await crowdfunding.makePayment(0);
     
         const request = await crowdfunding.requests(0);
@@ -82,14 +80,11 @@ describe("CrowdFunding Contract", function () {
     it("Should refund contributors if the target is not met", async function () {
         await crowdfunding.connect(contributor1).sendETH({ value: ethers.parseEther("1") });
     
-        // Move forward in time to surpass the deadline
-        await ethers.provider.send("evm_increaseTime", [3600]); // Increase time by 1 hour
-        await ethers.provider.send("evm_mine"); // Mine a new block to apply time shift
+        await ethers.provider.send("evm_increaseTime", [3600]);
+        await ethers.provider.send("evm_mine");
     
-        // Attempt to refund
         await crowdfunding.connect(contributor1).refund();
     
-        // Check if the contributor's balance has been refunded
         const balanceAfterRefund = await crowdfunding.contributers(contributor1.address);
         expect(balanceAfterRefund).to.equal(0);
     });            
